@@ -6,7 +6,7 @@ export function LinearGradientColor() {
             colors={['rgba(250, 250, 250, 0)', '#fafafa']}
             style={{
                 position: 'absolute',
-                height: 160,
+                height: 100,
                 left: 0,
                 right: 0,
                 bottom: 0,

@@ -1,9 +1,18 @@
-import { useNavigation } from '@react-navigation/native';
-import { Trash, PencilLine } from 'phosphor-react-native';
+import { Alert } from 'react-native';
+
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { PencilLine, Trash } from 'phosphor-react-native';
 
 import { Button } from '@components/Button';
-import { Header } from "@components/Header";
+import { Chip } from '@components/Chip';
+import { Header } from '@components/Header';
 
+import { Loading } from '@components/Loading';
+import { DietStatus } from '@components/MealItem/styles';
+import { mealDelete } from '@storage/meals/mealDelete';
+import { mealGetOne } from '@storage/meals/mealGetOne';
+import format from 'date-fns/format';
+import { useEffect, useState } from 'react';
 import {
     Container,
     ContentBody,
@@ -13,11 +22,26 @@ import {
     Label,
     Title
 } from "./styles";
-import { Chip } from '@components/Chip';
 
+type RouteParams = {
+    mealId: string;
+}
+
+type Meal = {
+    title: string;
+    description: string;
+    date: Date;
+    time: Date;
+    status: DietStatus;
+}
 
 export function Meal() {
+    const [loading, setLoading] = useState(true);
+    const [meal, setMeal] = useState<Meal>();
     const navigation = useNavigation();
+
+    const route = useRoute();
+    const { mealId } = route.params as RouteParams;
 
     function handleBackButton() {
         navigation.navigate("home");
@@ -28,8 +52,61 @@ export function Meal() {
     }
 
     function handleDeleteMeal() {
-        navigation.navigate("new-meal");
+        Alert.alert("Refeições", "Deseja realmente excluir o registro da refeição?", [
+            {
+                text: "Cancelar",
+                style: "cancel"
+            },
+            {
+                onPress: () => deleteMeal(),
+                text: "Sim, excluir",
+                style: "destructive"
+            },
+        ]);
     }
+
+    async function deleteMeal() {
+        try {
+            await mealDelete(mealId);
+        } catch (error) {
+            console.error(error);
+            Alert.alert("Refeições", "Houve um erro ao deletar esta refeição.");
+        } finally {
+            navigation.navigate("home");
+        }
+    }
+
+    async function loadMeal() {
+        try {
+            const storedMeal = await mealGetOne(mealId);
+
+            if (!storedMeal) {
+                throw new Error("Refeição não encontrada na lsita de refeições.");
+            }
+
+            const meal = {
+                title: storedMeal.name,
+                description: storedMeal.description,
+                date: new Date(storedMeal.day),
+                time: new Date(storedMeal.hour),
+                status: storedMeal.status
+            };
+
+            setMeal(meal);
+        } catch (error) {
+            console.error(error);
+            Alert.alert("Refeições", "Houve um erro ao carregar a refeição.");
+        } finally {
+            setTimeout(() => {
+                setLoading(false);
+            }, 500)
+            // setLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        loadMeal();
+    }, []);
 
     return (
         <Container>
@@ -41,27 +118,31 @@ export function Meal() {
                 />
             </ContentHeader>
             <ContentBody>
-                <Title>Sanduíche</Title>
-                <Description>
-                    Sanduíche de pão integral com atum e salada de alface e tomate
-                </Description>
+                {loading ? <Loading /> : (
+                    <>
+                        <Title>{meal?.title}</Title>
+                        <Description>{meal?.description || 'Nenhuma descrição adicionada'}</Description>
 
-                <Label>Data e hora</Label>
-                <Description>12/08/2022 às 16:00</Description>
+                        <Label>Data e hora</Label>
+                        <Description>{format(meal!.date, "dd/MM/yyyy")} às {format(meal!.time, "hh:mm")}</Description>
 
-                <Chip status="WITHIN_THE_DIET" />
+                        <Chip status={meal?.status ?? 'WITHIN_THE_DIET'} />
+                    </>
+                )}
             </ContentBody>
             <ContentFooter>
                 <Button
                     title="Editar refeição"
                     icon={<PencilLine />}
                     style={{ marginBottom: 10 }}
+                    disabled={!meal}
                     onPress={handleEditMeal}
                 />
                 <Button
                     title="Excluir refeição"
                     icon={<Trash />}
                     type="OUTLINE"
+                    disabled={!meal}
                     onPress={handleDeleteMeal}
                 />
             </ContentFooter>

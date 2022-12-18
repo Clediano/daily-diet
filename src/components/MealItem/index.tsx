@@ -11,18 +11,18 @@ import {
 } from "./styles";
 
 type MealItemProps = TouchableOpacityProps & {
-    title: string;
+    name: string;
     hour: string;
     status: DietStatus
 }
 
-export function MealItem({ title, hour, status, ...rest }: MealItemProps) {
+export function MealItem({ name, hour, status, ...rest }: MealItemProps) {
     return (
         <Container {...rest}>
             <Content>
                 <Hour>{hour}</Hour>
                 <Pipe>|</Pipe>
-                <Title>{title}</Title>
+                <Title>{name}</Title>
             </Content>
             <Status status={status} />
         </Container>

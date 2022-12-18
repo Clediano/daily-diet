@@ -5,7 +5,9 @@ export declare global {
             statistic: undefined;
             'new-meal': undefined;
             feedback: undefined;
-            meal: undefined;
+            meal: {
+                mealId: string;
+            };
         }
     }
 }

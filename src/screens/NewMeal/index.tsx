@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Alert, View } from 'react-native';
 
 import { Button } from '@components/Button';
 import { Header } from "@components/Header";
@@ -20,14 +20,19 @@ import {
 import format from 'date-fns/format';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
+import { mealCreate } from '@storage/meals/mealCreate';
 
 export function NewMeal() {
     const navigation = useNavigation();
+
     const [date, setDate] = useState<Date>(new Date());
     const [time, setTime] = useState<Date>(new Date());
+    const [name, setName] = useState<string>("");
+    const [description, setDescription] = useState<string>("");
+    const [checkedStatusDiet, setCheckedStatusDiet] = useState<DietStatus>("WITHIN_THE_DIET");
+
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showTimePicker, setShowTimePicker] = useState(false);
-    const [checkedStatusDiet, setCheckedStatusDiet] = useState<DietStatus>("WITHIN_THE_DIET");
 
     function handleChangeDate(event: DateTimePickerEvent, selectedDate?: Date) {
         setShowDatePicker(false);
@@ -43,6 +48,22 @@ export function NewMeal() {
         navigation.navigate("home");
     };
 
+    async function handleCreateMeal() {
+        try {
+            await mealCreate({
+                name: name,
+                description: description,
+                day: date,
+                hour: time,
+                status: checkedStatusDiet
+            });
+            handlePressBackButton();
+        } catch (error) {
+            console.error(error);
+            Alert.alert("Nova refeição", "Houve um erro ao adicionar uma nova refeição.");
+        }
+    }
+
     return (
         <Container>
             <ContentHeader>
@@ -56,6 +77,8 @@ export function NewMeal() {
                 <InputContent>
                     <TextInput
                         label="Nome"
+                        value={name}
+                        onChangeText={setName}
                     />
                 </InputContent>
                 <InputContent>
@@ -63,6 +86,8 @@ export function NewMeal() {
                         multiline
                         numberOfLines={5}
                         label="Descrição"
+                        value={description}
+                        onChangeText={setDescription}
                     />
                 </InputContent>
                 <InlineInputContent>
@@ -119,6 +144,7 @@ export function NewMeal() {
             <ContentFooter>
                 <Button
                     title="Cadastrar refeição"
+                    onPress={handleCreateMeal}
                 />
             </ContentFooter>
         </Container>

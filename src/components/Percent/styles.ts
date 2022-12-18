@@ -4,23 +4,20 @@ import { TouchableOpacity } from 'react-native';
 
 import { DietStatus } from "@components/MealItem/styles";
 
-type ContainerProps = {
-    type: DietStatus;
-}
-
-type OpenIconProps = IconProps & {
+type Props = {
     status: DietStatus;
 }
 
-export const Container = styled(TouchableOpacity) <ContainerProps>`
+
+export const Container = styled(TouchableOpacity) <Props>`
     align-items: center;
 
     border-radius: 8px;
 
     padding: 20px 16px;
 
-    background-color: ${({ theme, type }) =>
-        type === 'WITHIN_THE_DIET' ?
+    background-color: ${({ theme, status }) =>
+        status === 'WITHIN_THE_DIET' ?
             theme.COLORS.GREEN_LIGHT :
             theme.COLORS.RED_LIGHT};
 `;
@@ -41,7 +38,7 @@ export const Subtitle = styled.Text`
     `};
 `;
 
-export const OpenIcon = styled(ArrowUpRight).attrs<OpenIconProps>(({ theme, status, ...rest }) => ({
+export const OpenIcon = styled(ArrowUpRight).attrs<Props>(({ theme, status, ...rest }) => ({
     size: 24,
     color: status === 'WITHIN_THE_DIET' ?
         theme.COLORS.GREEN_DARK :
