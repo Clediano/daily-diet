@@ -27,7 +27,8 @@ type RouteParams = {
     mealId: string;
 }
 
-type Meal = {
+export type Meal = {
+    id: string;
     title: string;
     description: string;
     date: Date;
@@ -48,7 +49,7 @@ export function Meal() {
     }
 
     function handleEditMeal() {
-        navigation.navigate("home");
+        navigation.navigate("new-meal", { mealId });
     }
 
     function handleDeleteMeal() {
@@ -85,6 +86,7 @@ export function Meal() {
             }
 
             const meal = {
+                id: storedMeal.id,
                 title: storedMeal.name,
                 description: storedMeal.description,
                 date: new Date(storedMeal.day),
@@ -97,10 +99,7 @@ export function Meal() {
             console.error(error);
             Alert.alert("Refeições", "Houve um erro ao carregar a refeição.");
         } finally {
-            setTimeout(() => {
-                setLoading(false);
-            }, 500)
-            // setLoading(false);
+            setLoading(false);
         }
     }
 

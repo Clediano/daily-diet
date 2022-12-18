@@ -39,7 +39,7 @@ export function Home() {
   }
 
   function handleNewMeal() {
-    navigation.navigate('new-meal');
+    navigation.navigate('new-meal', {});
   }
 
   function handleMeal(mealId: string) {
@@ -52,7 +52,6 @@ export function Home() {
       const meals = await mealGetAll();
 
       const response = convertToView(meals);
-      console.log(JSON.stringify(response))
       setMeals(response);
     } catch (error) {
       console.error(error);
